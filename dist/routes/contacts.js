@@ -32,7 +32,16 @@ router.route('/create')
 }));
 router.route('/list')
     .get((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const contacts = yield Contact_1.default.find().lean();
+    var perPage = 12;
+    var page = req.query.page;
+    if (page == undefined)
+        page = '1';
+    var colName = req.query.search;
+    if (colName == undefined)
+        colName = "";
+    console.log('search : ', colName);
+    const contacts = yield Contact_1.default.find({ "name": { $regex: '.*' + colName + '.*' } })
+        .skip((perPage * page) - perPage).limit(perPage).lean();
     //console.log(contacts);
     res.render('contacts/list', { contacts });
 }));
@@ -73,11 +82,13 @@ router.route('/import/')
     const csvFilePath = uploadPath;
     const array = yield csv().fromFile(csvFilePath);
     console.log(array);
-    array.forEach((element) => {
+    array.forEach((element) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(element);
-        const newContact = new Contact_1.default({ element, : .name, element, : .phone });
+        var name = element.name;
+        var phone = element.phone;
+        const newContact = new Contact_1.default({ name, phone });
         yield newContact.save();
-    });
+    }));
     res.redirect('/contacts/list');
 }));
 exports.default = router;
