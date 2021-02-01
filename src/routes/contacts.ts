@@ -33,8 +33,15 @@ router.route('/list')
         console.log('search : ', colName);
         const contacts = await Contact.find({ "name": { $regex: '.*' + colName + '.*' }})
             .skip((perPage * (page as any)) - perPage).limit(perPage).lean();
+
+        var count = await Contact.find({ "name": { $regex: '.*' + colName + '.*' }}).count();
+        var current = page;
+        var pages = Math.ceil(count / perPage);
+        var prev = parseInt(current as string) - 1;
+        var next = parseInt(current as string) + 1;
+
         //console.log(contacts);
-        res.render('contacts/list', { contacts });
+        res.render('contacts/list', { contacts, current, pages, prev, next });
     })
 
 router.route('/delete/:id')
